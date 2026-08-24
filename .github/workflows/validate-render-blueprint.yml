@@ -1,0 +1,38 @@
+name: Validate Render Blueprint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - render.yaml
+      - .scripts/render-*.sh
+      - .scripts/validate-render-blueprint.sh
+  pull_request:
+    paths:
+      - render.yaml
+      - .scripts/render-*.sh
+      - .scripts/validate-render-blueprint.sh
+
+jobs:
+  validate-blueprint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validar render.yaml (local)
+        run: bash .scripts/validate-render-blueprint.sh
+
+      - name: Validar render.yaml (Render API)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
+        run: |
+          if [[ -n "${RENDER_API_KEY:-}" && -n "${RENDER_OWNER_ID:-}" ]]; then
+            bash .scripts/validate-render-blueprint.sh
+          else
+            echo "RENDER_API_KEY / RENDER_OWNER_ID não configurados — validação API ignorada."
+          fi

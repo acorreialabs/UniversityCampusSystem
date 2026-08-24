@@ -3,7 +3,8 @@
 # Pré-requisito: base PostgreSQL gratuita em https://neon.tech
 # Guia completo: docs/deploy-gratuito.md
 #
-# Deploy: Render Dashboard → New → Blueprint → ligar este repositório.
+# Deploy: https://render.com/deploy?repo=https://github.com/armandocorreia/UniversityCampusSystem
+# Setup BD: npm run provision:deploy (Neon) → colar DATABASE_URL no Render.
 
 services:
   - type: web

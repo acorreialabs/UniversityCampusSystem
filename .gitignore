@@ -4,6 +4,7 @@ build/
 coverage/
 .env
 .env.local
+.env.deploy
 *.log
 .DS_Store
 .vite/

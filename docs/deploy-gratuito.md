@@ -8,6 +8,45 @@ Este guia publica o sistema a partir do GitHub sem servidor próprio. O reposit�
 
 ---
 
+## 0. Setup automático (recomendado)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/armandocorreia/UniversityCampusSystem)
+
+### Comando único (Neon + migrações + seed)
+
+```bash
+cp .env.deploy.example .env.deploy
+# 1. Obter NEON_API_KEY em https://console.neon.tech/app/settings/api-keys
+# 2. Colar em .env.deploy
+export $(grep -v '^#' .env.deploy | grep -v '^$' | xargs)
+npm run provision:deploy
+```
+
+O script:
+
+1. Cria projecto **Neon** gratuito (`smart-campus-core`)
+2. Aplica **migrações** e **seed** (utilizadores demo)
+3. Mostra o link **Deploy to Render** e copia `DATABASE_URL` (macOS)
+
+Depois:
+
+1. Clicar no botão Render (ou abrir o link impresso)
+2. Ligar conta GitHub → colar **`DATABASE_URL`** quando pedido → **Apply**
+3. Aguardar build (~5–10 min) → verificar:
+
+```bash
+npm run verify:deploy
+```
+
+| Script npm | Descrição |
+| --- | --- |
+| `npm run provision:neon` | Só criar BD Neon |
+| `npm run provision:deploy` | Neon + migrate + seed + instruções Render |
+| `npm run verify:deploy` | Testar `/health` e frontend |
+| `npm run validate:render` | Validar `render.yaml` |
+
+---
+
 ## 1. Arquitectura em produção
 
 ```text

@@ -61,11 +61,17 @@ docker compose up --build
 
 ## Deploy gratuito (GitHub → Internet)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/armandocorreia/UniversityCampusSystem)
+
 Publicar online **sem custo** com PostgreSQL [Neon](https://neon.tech) + API e frontend [Render](https://render.com):
 
-1. Criar BD no Neon e copiar `DATABASE_URL`
-2. Render → **New → Blueprint** → repositório → definir `DATABASE_URL`
-3. Após deploy: `bash .scripts/render-seed.sh` (Shell Render ou local)
+```bash
+cp .env.deploy.example .env.deploy
+# Editar .env.deploy → NEON_API_KEY (https://console.neon.tech/app/settings/api-keys)
+export $(grep -v '^#' .env.deploy | xargs)
+npm run provision:deploy
+# Colar DATABASE_URL no Render quando pedido → npm run verify:deploy
+```
 
 Guia completo: **[docs/deploy-gratuito.md](docs/deploy-gratuito.md)** · Blueprint: [`render.yaml`](render.yaml)
 

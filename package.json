@@ -24,7 +24,11 @@
     "build:render:api": "bash .scripts/render-build-api.sh",
     "build:render:web": "bash .scripts/render-build-web.sh",
     "start:render:api": "bash .scripts/render-start-api.sh",
-    "seed:render": "bash .scripts/render-seed.sh"
+    "seed:render": "bash .scripts/render-seed.sh",
+    "provision:neon": "bash .scripts/provision-neon.sh",
+    "provision:deploy": "bash .scripts/provision-deploy.sh",
+    "verify:deploy": "bash .scripts/verify-deploy.sh",
+    "validate:render": "bash .scripts/validate-render-blueprint.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
