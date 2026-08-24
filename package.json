@@ -29,7 +29,8 @@
     "provision:deploy": "bash .scripts/provision-deploy.sh",
     "verify:deploy": "bash .scripts/verify-deploy.sh",
     "validate:render": "bash .scripts/validate-render-blueprint.sh",
-    "diagnose:deploy": "bash .scripts/diagnose-deploy.sh"
+    "diagnose:deploy": "bash .scripts/diagnose-deploy.sh",
+    "checklist:render": "bash .scripts/render-checklist.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
