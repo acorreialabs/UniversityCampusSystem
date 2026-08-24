@@ -29,7 +29,8 @@ resolve_api_url() {
 
 export VITE_API_BASE_URL="$(resolve_api_url)"
 
-npm install
+# Render define NODE_ENV=production — devDependencies necessárias para tsc/vite
+npm install --include=dev
 npm run build -w @smart-campus/shared-types
 npm run build -w @smart-campus/validation
 npm run build -w @smart-campus/api-client
