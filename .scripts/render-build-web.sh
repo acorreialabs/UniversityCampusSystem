@@ -6,16 +6,25 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 resolve_api_url() {
+  local url=""
   if [[ -n "${VITE_API_BASE_URL:-}" ]]; then
-    echo "$VITE_API_BASE_URL"
-    return
+    url="$VITE_API_BASE_URL"
+  elif [[ -n "${RENDER_EXTERNAL_URL:-}" ]]; then
+    url="${RENDER_EXTERNAL_URL}"
+  elif [[ -n "${API_PUBLIC_HOST:-}" ]]; then
+    url="https://${API_PUBLIC_HOST}"
+  else
+    echo "Defina VITE_API_BASE_URL, RENDER_EXTERNAL_URL ou API_PUBLIC_HOST." >&2
+    exit 1
   fi
-  if [[ -n "${API_PUBLIC_HOST:-}" ]]; then
-    echo "https://${API_PUBLIC_HOST}/api/v1"
-    return
-  fi
-  echo "Defina VITE_API_BASE_URL ou API_PUBLIC_HOST." >&2
-  exit 1
+
+  url="${url%/}"
+  case "$url" in
+    */api/v1) ;;
+    */api) url="${url}/v1" ;;
+    *) url="${url}/api/v1" ;;
+  esac
+  echo "$url"
 }
 
 export VITE_API_BASE_URL="$(resolve_api_url)"

@@ -28,7 +28,8 @@
     "provision:neon": "bash .scripts/provision-neon.sh",
     "provision:deploy": "bash .scripts/provision-deploy.sh",
     "verify:deploy": "bash .scripts/verify-deploy.sh",
-    "validate:render": "bash .scripts/validate-render-blueprint.sh"
+    "validate:render": "bash .scripts/validate-render-blueprint.sh",
+    "diagnose:deploy": "bash .scripts/diagnose-deploy.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

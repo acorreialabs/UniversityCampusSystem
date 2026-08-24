@@ -43,6 +43,11 @@ services:
         source: /*
         destination: /index.html
     envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: smart-campus-api
+          envVarKey: RENDER_EXTERNAL_URL
       - key: API_PUBLIC_HOST
         fromService:
           type: web

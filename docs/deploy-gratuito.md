@@ -271,7 +271,20 @@ Ver também [`.env.example`](../.env.example) para desenvolvimento local.
 | Erro CORS no browser | `CORS_ORIGIN` não coincide com URL do web | Actualizar env da API com URL exacta do frontend |
 | Build web falha | API ainda não deployada | Deploy API primeiro; redeploy web |
 | `/health` timeout | Cold start | Aguardar e repetir pedido |
+| **503 Service Suspended** | API suspensa no Render | Dashboard → serviço API → **Resume** → Deploy |
+| Login falha com web OK | Frontend aponta API errada | Ver secção abaixo |
 | Migrações falham | BD vazia ou versão errada | Logs Render → `prisma migrate deploy` |
+
+### Frontend com URL de API errada
+
+Se o login falha mas o site abre, o build do frontend pode apontar para outro serviço Render.
+
+1. **smart-campus-web** → **Environment**
+2. Apagar `VITE_API_BASE_URL` manual incorrecto (ex.: outro hostname ou `/api` sem `/v1`)
+3. Manter `API_PUBLIC_HOST` = hostname da API (`smart-campus-api.onrender.com`)
+4. **Manual Deploy** do serviço web
+
+Diagnóstico local: `npm run diagnose:deploy`
 
 **Logs:** Render Dashboard → serviço → **Logs**.
 
