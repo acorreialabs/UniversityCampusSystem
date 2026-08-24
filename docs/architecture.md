@@ -706,6 +706,8 @@ Entrada (`IN`): atribui matrícula a vaga livre. Saída (`OUT`): liberta vaga.
 
 Comando: `docker compose up --build`
 
+**Deploy gratuito (recomendado para demo online):** Neon (PostgreSQL) + Render (API + static web). Ver [`deploy-gratuito.md`](deploy-gratuito.md) e [`render.yaml`](../render.yaml).
+
 ### 13.2 Dockerfile (multi-stage)
 
 1. **base** — `npm install` com workspaces  

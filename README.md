@@ -59,8 +59,19 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Deploy gratuito (GitHub → Internet)
+
+Publicar online **sem custo** com PostgreSQL [Neon](https://neon.tech) + API e frontend [Render](https://render.com):
+
+1. Criar BD no Neon e copiar `DATABASE_URL`
+2. Render → **New → Blueprint** → repositório → definir `DATABASE_URL`
+3. Após deploy: `bash .scripts/render-seed.sh` (Shell Render ou local)
+
+Guia completo: **[docs/deploy-gratuito.md](docs/deploy-gratuito.md)** · Blueprint: [`render.yaml`](render.yaml)
+
 ## Documentação
 
+- [**Deploy gratuito (Neon + Render)**](docs/deploy-gratuito.md) — publicar a partir do GitHub
 - [**Manual de construção do Core**](docs/manual-construcao-core.md) — passo a passo completo (arquitectura → infraestrutura → validação)
 - [**Manual das APIs do Core**](docs/manual-apis-core.md) — todas as APIs, criação e testes (Swagger, Postman, curl)
 - [Arquitectura](docs/architecture.md)

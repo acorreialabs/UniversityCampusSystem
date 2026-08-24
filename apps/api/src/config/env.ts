@@ -17,11 +17,38 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+/** Aceita host Render (ex.: app.onrender.com) além de URL completa. */
+export function normalizeCorsOrigin(origin: string): string {
+  const trimmed = origin.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
+export function normalizeCorsOrigins(origins: string): string {
+  return origins
+    .split(',')
+    .map(normalizeCorsOrigin)
+    .filter(Boolean)
+    .join(',');
+}
+
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
-  const parsed = envSchema.safeParse(source);
+  const merged: NodeJS.ProcessEnv = { ...source };
+  if (!merged.API_PORT && merged.PORT) {
+    merged.API_PORT = merged.PORT;
+  }
+
+  const parsed = envSchema.safeParse(merged);
   if (!parsed.success) {
     const details = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     throw new Error(`Configuração inválida: ${details}`);
   }
-  return parsed.data;
+
+  return {
+    ...parsed.data,
+    CORS_ORIGIN: normalizeCorsOrigins(parsed.data.CORS_ORIGIN),
+  };
 }

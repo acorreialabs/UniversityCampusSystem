@@ -20,7 +20,11 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
-    "lint": "npm run lint -w @smart-campus/api --if-present && npm run lint -w @smart-campus/web --if-present"
+    "lint": "npm run lint -w @smart-campus/api --if-present && npm run lint -w @smart-campus/web --if-present",
+    "build:render:api": "bash .scripts/render-build-api.sh",
+    "build:render:web": "bash .scripts/render-build-web.sh",
+    "start:render:api": "bash .scripts/render-start-api.sh",
+    "seed:render": "bash .scripts/render-seed.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
