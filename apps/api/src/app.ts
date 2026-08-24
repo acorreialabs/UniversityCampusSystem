@@ -56,6 +56,15 @@ export function createApp() {
     });
   });
 
+  app.get('/', (_req, res) => {
+    res.json({
+      service: 'smart-campus-api',
+      docs: '/api/docs',
+      health: '/health',
+      api: '/api/v1',
+    });
+  });
+
   try {
     const candidates = [
       join(process.cwd(), 'docs/openapi.yaml'),
