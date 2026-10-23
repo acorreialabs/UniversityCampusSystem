@@ -42,10 +42,10 @@
 | key | Módulo | Rota | Estado | Grupo atribuído | Branch sugerida |
 | --- | --- | --- | --- | --- | --- |
 | campus | Hub campus | `/campus` | partial | _a definir_ | — |
-| buildings | Edifícios | `/buildings` | partial | _a definir_ | `feature/grupo-infra-buildings-crud` |
+| buildings | Edifícios | `/buildings` | **available** | Grupo Infraestrutura | `feature/grupo-infra-campus-crud` |
 | rooms | Salas | `/rooms` | **available** | Core | — |
-| laboratories | Laboratórios | `/laboratories` | development | _a definir_ | `feature/grupo-infra-laboratories-crud` |
-| equipment | Equipamentos | `/equipment` | development | _a definir_ | `feature/grupo-infra-equipment-crud` |
+| laboratories | Laboratórios | `/laboratories` | **available** | Grupo Infraestrutura | `feature/grupo-infra-campus-crud` |
+| equipment | Equipamentos | `/equipment` | **available** | Grupo Infraestrutura | `feature/grupo-infra-campus-crud` |
 | parking | Estacionamento | `/parking` | **available** | Core | — |
 
 **Modelos Prisma:** `Building`, `Room`, `Laboratory`, `Equipment`, `ParkingLot`, `ParkingSpot`, `PlateReading`.

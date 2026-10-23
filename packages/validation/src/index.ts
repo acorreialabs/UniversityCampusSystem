@@ -32,12 +32,34 @@ export const createRoomSchema = z.object({
   buildingId: z.string().min(1),
 });
 
+export const createBuildingSchema = z.object({
+  code: z.string().min(2).max(32),
+  name: z.string().min(2).max(120),
+  description: z.string().max(500).optional().nullable(),
+  floors: z.number().int().min(0).max(200).default(1),
+});
+
+export const createLaboratorySchema = z.object({
+  code: z.string().min(2).max(32),
+  name: z.string().min(2).max(120),
+  description: z.string().max(500).optional().nullable(),
+  buildingId: z.string().min(1),
+});
+
 export const createIncidentSchema = z.object({
   title: z.string().min(3).max(160),
   description: z.string().min(5).max(2000),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).default('MEDIUM'),
   roomId: z.string().optional().nullable(),
   equipmentId: z.string().optional().nullable(),
+});
+
+export const createEquipmentSchema = z.object({
+  code: z.string().min(2).max(32),
+  name: z.string().min(2).max(120),
+  description: z.string().max(500).optional().nullable(),
+  roomId: z.string().optional().nullable(),
+  laboratoryId: z.string().optional().nullable(),
 });
 
 export const updateIncidentStatusSchema = z.object({
@@ -71,6 +93,9 @@ export const updateParkingSpotSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
+export type CreateBuildingInput = z.infer<typeof createBuildingSchema>;
+export type CreateLaboratoryInput = z.infer<typeof createLaboratorySchema>;
+export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>;
 export type CreateIncidentInput = z.infer<typeof createIncidentSchema>;
 export type UpdateIncidentStatusInput = z.infer<typeof updateIncidentStatusSchema>;
 export type CreatePlateReadingInput = z.infer<typeof createPlateReadingSchema>;

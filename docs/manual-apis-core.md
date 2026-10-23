@@ -114,14 +114,30 @@ Detalhe: [api-conventions.md](./api-conventions.md).
 | GET | `/users` | Sim | ADMIN, COORDINATOR | Listar utilizadores |
 | POST | `/users` | Sim | ADMIN | Criar utilizador |
 
-### 3.4 Campus físico (salas / edifícios)
+### 3.4 Campus físico (salas / edifícios / laboratórios / equipamentos)
 
 | Método | Rota | Auth | Roles | Descrição |
 | --- | --- | --- | --- | --- |
-| GET | `/buildings` | Sim | Qualquer | Listar edifícios |
 | GET | `/rooms` | Sim | Qualquer | Listar salas |
 | GET | `/rooms/:id` | Sim | Qualquer | Obter sala |
 | POST | `/rooms` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Criar sala |
+| PATCH | `/rooms/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Actualizar sala |
+| DELETE | `/rooms/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Eliminar sala |
+| GET | `/buildings` | Sim | Qualquer | Listar edifícios |
+| GET | `/buildings/:id` | Sim | Qualquer | Obter edifício |
+| POST | `/buildings` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Criar edifício |
+| PATCH | `/buildings/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Actualizar edifício |
+| DELETE | `/buildings/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Eliminar edifício |
+| GET | `/laboratories` | Sim | Qualquer | Listar laboratórios |
+| GET | `/laboratories/:id` | Sim | Qualquer | Obter laboratório |
+| POST | `/laboratories` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Criar laboratório |
+| PATCH | `/laboratories/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Actualizar laboratório |
+| DELETE | `/laboratories/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Eliminar laboratório |
+| GET | `/equipment` | Sim | Qualquer | Listar equipamentos |
+| GET | `/equipment/:id` | Sim | Qualquer | Obter equipamento |
+| POST | `/equipment` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Criar equipamento |
+| PATCH | `/equipment/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Actualizar equipamento |
+| DELETE | `/equipment/:id` | Sim | ADMIN, COORDINATOR, TECHNICIAN | Eliminar equipamento |
 
 ### 3.5 Ocorrências
 
@@ -170,7 +186,7 @@ Detalhe: [api-conventions.md](./api-conventions.md).
 | GET | `/subjects` | Sim | Qualquer | Listar disciplinas (`?courseId=`) |
 | POST | `/subjects` | Sim | ADMIN, COORDINATOR | Criar disciplina |
 
-**Total Core documentado:** 1 health + **31 endpoints** em `/api/v1` (21 do Core base + 10 da Gestão Académica).
+**Total Core documentado:** 1 health + **47 endpoints** em `/api/v1` (23 do Core base, incluindo 2 novos em `/rooms`, + 10 da Gestão Académica + 14 do Grupo Infraestrutura).
 
 ---
 
@@ -375,16 +391,23 @@ Só **ADMIN** pode criar.
 
 ---
 
-### 5.4 Salas e edifícios (`rooms`)
+### 5.4 Salas e edifícios (`rooms` / `buildings`)
 
 | Item | Detalhe |
 | --- | --- |
-| Router | `apps/api/src/modules/rooms/http/roomsRouter.ts` |
-| Serviço | `apps/api/src/modules/rooms/application/roomService.ts` |
+| Router salas | `apps/api/src/modules/rooms/http/roomsRouter.ts` |
+| Serviço salas | `apps/api/src/modules/rooms/application/roomService.ts` |
+| Router edifícios | `apps/api/src/modules/buildings/http/buildingsRouter.ts` |
+| Serviço edifícios | `apps/api/src/modules/buildings/application/buildingService.ts` |
+| Modelos Prisma | `Building`, `Room`, enum `RoomStatus` (já existentes no Core) |
 
-#### GET `/buildings`
+#### GET `/buildings` / GET `/buildings/:id`
 
-Lista edifícios (seed: tipicamente A, B, …).
+Lista/obtém edifícios (seed: tipicamente A, B, …). O DTO inclui `roomsCount`. Estes endpoints são servidos pelo módulo `buildings`.
+
+#### POST / PATCH / DELETE `/buildings(/:id)`
+
+Roles ADMIN, COORDINATOR, TECHNICIAN. Código repetido → `409 BUILDING_CODE_EXISTS`. Auditoria: `BUILDING_CREATE`, `BUILDING_UPDATE`, `BUILDING_DELETE`.
 
 #### GET `/rooms` / GET `/rooms/:id`
 
@@ -407,11 +430,19 @@ DTO inclui `building: { id, code, name }`.
 
 `buildingId` obtém-se de `GET /buildings`.
 
+#### PATCH `/rooms/:id`
+
+Aceita os mesmos campos de `POST`, todos opcionais. Código repetido → `409 ROOM_CODE_EXISTS`. Auditoria `ROOM_UPDATE`.
+
+#### DELETE `/rooms/:id`
+
+Resposta `200` com `{ "id": "<id>" }`. Auditoria `ROOM_DELETE`.
+
 **Passos de criação:**
 
 1. Modelos `Building`, `Room` + enum `RoomStatus`  
-2. `createRoomSchema`  
-3. Serviço list/get/create + audit  
+2. `createRoomSchema`, `createBuildingSchema`  
+3. Serviço list/get/create/update/delete + audit  
 4. Roles mutação: ADMIN, COORDINATOR, TECHNICIAN  
 
 ---

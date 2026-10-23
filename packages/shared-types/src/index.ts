@@ -65,6 +65,41 @@ export type RoomDto = {
   updatedAt: string;
 };
 
+export type BuildingDto = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  floors: number;
+  roomsCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LaboratoryDto = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  buildingId: string;
+  building: { id: string; code: string; name: string };
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EquipmentDto = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  roomId: string | null;
+  laboratoryId: string | null;
+  room: { id: string; code: string; name: string } | null;
+  laboratory: { id: string; code: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type IncidentDto = {
   id: string;
   title: string;
@@ -238,7 +273,7 @@ export const campusModules: CampusModule[] = [
     label: 'Edifícios',
     path: '/buildings',
     description: 'Cadastro de edifícios.',
-    status: 'partial',
+    status: 'available',
     groupHint: 'Grupo Infraestrutura',
   },
   {
@@ -254,7 +289,7 @@ export const campusModules: CampusModule[] = [
     label: 'Laboratórios',
     path: '/laboratories',
     description: 'Laboratórios e espaços técnicos.',
-    status: 'development',
+    status: 'available',
     groupHint: 'Grupo Infraestrutura',
   },
   {
@@ -262,7 +297,7 @@ export const campusModules: CampusModule[] = [
     label: 'Equipamentos',
     path: '/equipment',
     description: 'Inventário de equipamentos.',
-    status: 'development',
+    status: 'available',
     groupHint: 'Grupo Infraestrutura',
   },
   {

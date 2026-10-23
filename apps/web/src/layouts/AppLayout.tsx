@@ -42,7 +42,7 @@ export function AppLayout() {
       campusModules.filter((m) => {
         if (
           !primaryNav.includes(m.key) &&
-          !['buildings', 'devices', 'campus', 'teachers', 'maintenance', 'notifications'].includes(m.key)
+          !['buildings', 'laboratories', 'equipment', 'devices', 'campus', 'teachers', 'maintenance', 'notifications'].includes(m.key)
         ) {
           return false;
         }

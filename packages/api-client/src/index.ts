@@ -2,10 +2,13 @@ import type {
   ApiError,
   ApiSuccess,
   AuthUser,
+  BuildingDto,
   CourseDto,
   DashboardSummary,
   DepartmentDto,
+  EquipmentDto,
   IncidentDto,
+  LaboratoryDto,
   LoginResponse,
   ParkingLotOverview,
   PlateReadingDto,
@@ -82,6 +85,28 @@ export function createApiClient(baseUrl: string, tokenStore: TokenStore) {
     rooms: () => request<RoomDto[]>('/rooms'),
     room: (id: string) => request<RoomDto>(`/rooms/${id}`),
     createRoom: (payload: unknown) => request<RoomDto>('/rooms', { method: 'POST', body: JSON.stringify(payload) }),
+    updateRoom: (id: string, payload: unknown) =>
+      request<RoomDto>(`/rooms/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteRoom: (id: string) => request<{ id: string }>(`/rooms/${id}`, { method: 'DELETE' }),
+    buildings: () => request<BuildingDto[]>('/buildings'),
+    building: (id: string) => request<BuildingDto>(`/buildings/${id}`),
+    createBuilding: (payload: unknown) => request<BuildingDto>('/buildings', { method: 'POST', body: JSON.stringify(payload) }),
+    updateBuilding: (id: string, payload: unknown) =>
+      request<BuildingDto>(`/buildings/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteBuilding: (id: string) => request<{ id: string }>(`/buildings/${id}`, { method: 'DELETE' }),
+    laboratories: () => request<LaboratoryDto[]>('/laboratories'),
+    laboratory: (id: string) => request<LaboratoryDto>(`/laboratories/${id}`),
+    createLaboratory: (payload: unknown) =>
+      request<LaboratoryDto>('/laboratories', { method: 'POST', body: JSON.stringify(payload) }),
+    updateLaboratory: (id: string, payload: unknown) =>
+      request<LaboratoryDto>(`/laboratories/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteLaboratory: (id: string) => request<{ id: string }>(`/laboratories/${id}`, { method: 'DELETE' }),
+    equipment: () => request<EquipmentDto[]>('/equipment'),
+    equipmentItem: (id: string) => request<EquipmentDto>(`/equipment/${id}`),
+    createEquipment: (payload: unknown) => request<EquipmentDto>('/equipment', { method: 'POST', body: JSON.stringify(payload) }),
+    updateEquipment: (id: string, payload: unknown) =>
+      request<EquipmentDto>(`/equipment/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+    deleteEquipment: (id: string) => request<{ id: string }>(`/equipment/${id}`, { method: 'DELETE' }),
     incidents: () => request<IncidentDto[]>('/incidents'),
     createIncident: (payload: unknown) => request<IncidentDto>('/incidents', { method: 'POST', body: JSON.stringify(payload) }),
     updateIncidentStatus: (id: string, payload: unknown) =>

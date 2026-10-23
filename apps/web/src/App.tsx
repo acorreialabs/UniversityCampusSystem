@@ -6,6 +6,8 @@ import { CampusOpsPage } from './pages/CampusOpsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/UsersPage';
 import { RoomsPage } from './pages/RoomsPage';
+import { LaboratoriesPage } from './pages/LaboratoriesPage';
+import { EquipmentPage } from './pages/EquipmentPage';
 import { IncidentsPage } from './pages/IncidentsPage';
 import { BuildingsPage } from './pages/BuildingsPage';
 import { DevicesPage } from './pages/DevicesPage';
@@ -46,8 +48,6 @@ const placeholderKeys = campusModules
       'enrolments',
       'assessments',
       'schedules',
-      'laboratories',
-      'equipment',
       'maintenance',
       'sensors',
       'readings',
@@ -81,6 +81,8 @@ export function App() {
         <Route path="campus" element={<CampusHubPage />} />
         <Route path="buildings" element={<BuildingsPage />} />
         <Route path="rooms" element={<RoomsPage />} />
+        <Route path="laboratories" element={<LaboratoriesPage />} />
+        <Route path="equipment" element={<EquipmentPage />} />
         <Route path="incidents" element={<IncidentsPage />} />
         <Route path="iot" element={<IotHubPage />} />
         <Route path="parking" element={<ParkingPage />} />

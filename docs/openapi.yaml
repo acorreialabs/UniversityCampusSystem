@@ -33,6 +33,12 @@ tags:
     description: Perfil e gestão de utilizadores
   - name: Rooms
     description: Edifícios e salas
+  - name: Buildings
+    description: Cadastro de edifícios (Grupo Infraestrutura)
+  - name: Laboratories
+    description: Laboratórios (Grupo Infraestrutura)
+  - name: Equipment
+    description: Inventário de equipamentos (Grupo Infraestrutura)
   - name: Incidents
     description: Ocorrências e estados
   - name: Dashboard
@@ -135,6 +141,83 @@ components:
         status: { type: string }
         building:
           type: object
+          properties:
+            id: { type: string }
+            code: { type: string }
+            name: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CreateBuildingRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string, example: B-01 }
+        name: { type: string, example: Edifício Central }
+        description: { type: string, nullable: true }
+        floors: { type: integer, minimum: 0, maximum: 200, default: 1 }
+    BuildingDto:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        floors: { type: integer }
+        roomsCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CreateLaboratoryRequest:
+      type: object
+      required: [code, name, buildingId]
+      properties:
+        code: { type: string, example: L-01 }
+        name: { type: string, example: Laboratório de Redes }
+        description: { type: string, nullable: true }
+        buildingId: { type: string }
+    LaboratoryDto:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        buildingId: { type: string }
+        building:
+          type: object
+          properties:
+            id: { type: string }
+            code: { type: string }
+            name: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CreateEquipmentRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string, example: EQ-01 }
+        name: { type: string, example: Projetor Epson }
+        description: { type: string, nullable: true }
+        roomId: { type: string, nullable: true }
+        laboratoryId: { type: string, nullable: true }
+    EquipmentDto:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        roomId: { type: string, nullable: true }
+        laboratoryId: { type: string, nullable: true }
+        room:
+          type: object
+          nullable: true
+          properties:
+            id: { type: string }
+            code: { type: string }
+            name: { type: string }
+        laboratory:
+          type: object
+          nullable: true
           properties:
             id: { type: string }
             code: { type: string }
@@ -406,13 +489,307 @@ paths:
                   meta: { $ref: '#/components/schemas/Meta' }
         '404':
           description: Não encontrada
+    patch:
+      tags: [Rooms]
+      summary: Actualizar sala
+      description: Roles ADMIN, COORDINATOR, TECHNICIAN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateRoomRequest' }
+      responses:
+        '200':
+          description: Sala actualizada
+        '403':
+          description: Sem permissão
+        '404':
+          description: Sala não encontrada
+        '409':
+          description: Código de sala já existente
+    delete:
+      tags: [Rooms]
+      summary: Remover sala
+      description: Roles ADMIN, COORDINATOR, TECHNICIAN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Sala removida
+        '403':
+          description: Sem permissão
+        '404':
+          description: Sala não encontrada
   /buildings:
     get:
-      tags: [Rooms]
+      tags: [Buildings]
       summary: Listar edifícios
       responses:
         '200':
           description: Lista de edifícios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/BuildingDto' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [Buildings]
+      summary: Criar edifício
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBuildingRequest' }
+      responses:
+        '201':
+          description: Criado
+        '400':
+          description: Payload inválido
+        '403':
+          description: Sem permissão
+  /buildings/{id}:
+    get:
+      tags: [Buildings]
+      summary: Obter edifício
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Edifício
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/BuildingDto' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '404':
+          description: Não encontrado
+    patch:
+      tags: [Buildings]
+      summary: Actualizar edifício
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBuildingRequest' }
+      responses:
+        '200':
+          description: Actualizado
+        '403':
+          description: Sem permissão
+    delete:
+      tags: [Buildings]
+      summary: Remover edifício
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Removido
+        '403':
+          description: Sem permissão
+  /laboratories:
+    get:
+      tags: [Laboratories]
+      summary: Listar laboratórios
+      responses:
+        '200':
+          description: Lista de laboratórios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/LaboratoryDto' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [Laboratories]
+      summary: Criar laboratório
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateLaboratoryRequest' }
+      responses:
+        '201':
+          description: Criado
+        '400':
+          description: Payload inválido
+        '403':
+          description: Sem permissão
+        '404':
+          description: Edifício não encontrado
+  /laboratories/{id}:
+    get:
+      tags: [Laboratories]
+      summary: Obter laboratório
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Laboratório
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/LaboratoryDto' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '404':
+          description: Não encontrado
+    patch:
+      tags: [Laboratories]
+      summary: Actualizar laboratório
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateLaboratoryRequest' }
+      responses:
+        '200':
+          description: Actualizado
+        '403':
+          description: Sem permissão
+    delete:
+      tags: [Laboratories]
+      summary: Remover laboratório
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Removido
+        '403':
+          description: Sem permissão
+  /equipment:
+    get:
+      tags: [Equipment]
+      summary: Listar equipamentos
+      responses:
+        '200':
+          description: Lista de equipamentos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/EquipmentDto' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [Equipment]
+      summary: Criar equipamento
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateEquipmentRequest' }
+      responses:
+        '201':
+          description: Criado
+        '400':
+          description: Payload inválido
+        '403':
+          description: Sem permissão
+        '404':
+          description: Sala ou laboratório não encontrado
+  /equipment/{id}:
+    get:
+      tags: [Equipment]
+      summary: Obter equipamento
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Equipamento
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/EquipmentDto' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+        '404':
+          description: Não encontrado
+    patch:
+      tags: [Equipment]
+      summary: Actualizar equipamento
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateEquipmentRequest' }
+      responses:
+        '200':
+          description: Actualizado
+        '403':
+          description: Sem permissão
+    delete:
+      tags: [Equipment]
+      summary: Remover equipamento
+      description: Roles TECHNICIAN, COORDINATOR, ADMIN.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Removido
+        '403':
+          description: Sem permissão
   /incidents:
     get:
       tags: [Incidents]
