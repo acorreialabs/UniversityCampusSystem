@@ -67,6 +67,31 @@ export const updateParkingSpotSchema = z.object({
   status: z.enum(['FREE', 'OCCUPIED', 'RESERVED', 'OUT_OF_SERVICE']),
   plate: mozambiquePlateSchema.optional().nullable(),
 });
+export const createDeviceSchema = z.object({
+  code: z.string().min(2).max(32),
+  name: z.string().min(2).max(120),
+  type: z.string().min(2).max(60),
+  status: z.enum(['ONLINE', 'OFFLINE', 'MAINTENANCE', 'UNKNOWN']).optional(),
+  roomId: z.string().optional().nullable(),
+  mqttTopic: z.string().max(200).optional().nullable(),
+});
+
+export const updateDeviceSchema = z
+  .object({
+    name: z.string().trim().min(2).max(100).optional(),
+    type: z.string().trim().min(2).max(50).optional(),
+    roomId: z.string().min(1).nullable().optional(),
+    mqttTopic: z.string().trim().max(200).nullable().optional(),
+  })
+  .strict()
+  .refine((o) => Object.keys(o).length > 0, {
+    message: 'Envie pelo menos um campo para actualizar',
+  });
+
+
+export const updateDeviceStatusSchema = z.object({
+  status: z.enum(['ONLINE', 'OFFLINE', 'MAINTENANCE', 'UNKNOWN']),
+});
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
@@ -75,7 +100,9 @@ export type CreateIncidentInput = z.infer<typeof createIncidentSchema>;
 export type UpdateIncidentStatusInput = z.infer<typeof updateIncidentStatusSchema>;
 export type CreatePlateReadingInput = z.infer<typeof createPlateReadingSchema>;
 export type UpdateParkingSpotInput = z.infer<typeof updateParkingSpotSchema>;
-
+export type CreateDeviceInput = z.infer<typeof createDeviceSchema>;
+export type UpdateDeviceStatusInput = z.infer<typeof updateDeviceStatusSchema>;
+export type UpdateDeviceInput = z.infer<typeof updateDeviceSchema>;
 
 export const createDepartmentSchema = z.object({
   code: z.string().trim().min(2).max(20),

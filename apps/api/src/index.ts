@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { loadEnv } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { prisma } from './lib/prisma.js';
+import { startMqttIngest } from './modules/iot/application/mqttIngestService.js';
 
 async function main() {
   const env = loadEnv();
@@ -15,8 +16,12 @@ async function main() {
     });
   });
 
+  // Telemetria MQTT (não arranca nos testes)
+  const stopMqtt = process.env.NODE_ENV === 'test' ? () => {} : startMqttIngest();
+
   const shutdown = async (signal: string) => {
     logger.info('A encerrar', { signal });
+    stopMqtt();
     server.close(async () => {
       await prisma.$disconnect();
       process.exit(0);

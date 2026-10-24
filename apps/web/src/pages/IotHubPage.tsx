@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth';
 import { mapApiDevices, type IotDeviceView } from '../lib/iotDemo';
 import { IotDeviceCard } from '../components/iot/IotDeviceCard';
 import { PageIntro } from '../components/PageIntro';
+import type { AlertDto } from '@smart-campus/shared-types';
 
 const pipeline = ['Sensor', 'ESP32', 'Wi-Fi', 'MQTT', 'API', 'Dashboard'];
 
@@ -14,6 +15,9 @@ export function IotHubPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pulse, setPulse] = useState(0);
+  const [alerts, setAlerts] = useState<AlertDto[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
+  const [alertsError, setAlertsError] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -32,6 +36,32 @@ export function IotHubPage() {
     return () => window.clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    if (!selectedId || selectedId.startsWith('demo-')) {
+      setAlerts([]);
+      setAlertsError(null);
+      setAlertsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setAlertsLoading(true);
+    setAlertsError(null);
+    api
+      .alerts(selectedId)
+      .then((res) => {
+        if (!cancelled) setAlerts(res.data);
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setAlertsError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setAlertsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [api, selectedId]);
+
   const selected = useMemo(() => devices.find((d) => d.id === selectedId) ?? null, [devices, selectedId]);
   const online = devices.filter((d) => d.status === 'ONLINE').length;
 
@@ -42,8 +72,7 @@ export function IotHubPage() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-campus-brass/25 bg-gradient-to-r from-campus-teal/10 via-white/80 to-campus-brass/10 px-4 py-3 text-sm text-campus-ink">
-        Hub IoT com dispositivos reais do Core e nós simulados para demonstração pedagógica. MQTT completo fica para o
-        grupo IoT.
+        Hub IoT com os dispositivos registados no Core. A telemetria em tempo real (MQTT) fica para o grupo IoT.
       </div>
 
       <PageIntro
@@ -82,14 +111,20 @@ export function IotHubPage() {
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.7fr)]">
         <div className="grid gap-3 sm:grid-cols-2">
-          {devices.map((device) => (
-            <IotDeviceCard
-              key={device.id}
-              device={device}
-              selected={device.id === selectedId}
-              onSelect={() => setSelectedId(device.id)}
-            />
-          ))}
+          {devices.length === 0 ? (
+            <p className="surface p-4 text-sm text-campus-deep/70 sm:col-span-2">
+              Ainda não há dispositivos registados. Cria o primeiro no <Link to="/devices" className="underline">inventário</Link>.
+            </p>
+          ) : (
+            devices.map((device) => (
+              <IotDeviceCard
+                key={device.id}
+                device={device}
+                selected={device.id === selectedId}
+                onSelect={() => setSelectedId(device.id)}
+              />
+            ))
+          )}
         </div>
 
         <aside className="surface h-fit p-4 sm:p-5 xl:sticky xl:top-24">
@@ -104,28 +139,62 @@ export function IotHubPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-campus-deep/50">Tópico MQTT</p>
                   <p className="mt-1 break-all font-mono text-xs text-campus-ink">{selected.mqttTopic}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="rounded-xl border border-campus-line/70 p-3">
-                    <p className="text-campus-deep/55">Sinal</p>
-                    <p className="font-display text-2xl font-semibold">{selected.signal}%</p>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded bg-campus-sand">
-                      <div className="h-full rounded bg-campus-teal" style={{ width: `${selected.signal}%` }} />
-                    </div>
+
+                {selected.signal !== null || selected.battery !== null ? (
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {selected.signal !== null ? (
+                      <div className="rounded-xl border border-campus-line/70 p-3">
+                        <p className="text-campus-deep/55">Sinal</p>
+                        <p className="font-display text-2xl font-semibold">{selected.signal}%</p>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded bg-campus-sand">
+                          <div className="h-full rounded bg-campus-teal" style={{ width: `${selected.signal}%` }} />
+                        </div>
+                      </div>
+                    ) : null}
+                    {selected.battery !== null ? (
+                      <div className="rounded-xl border border-campus-line/70 p-3">
+                        <p className="text-campus-deep/55">Bateria</p>
+                        <p className="font-display text-2xl font-semibold">{selected.battery}%</p>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded bg-campus-sand">
+                          <div className="h-full rounded bg-campus-brass" style={{ width: `${selected.battery}%` }} />
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
-                  <div className="rounded-xl border border-campus-line/70 p-3">
-                    <p className="text-campus-deep/55">Bateria</p>
-                    <p className="font-display text-2xl font-semibold">{selected.battery}%</p>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded bg-campus-sand">
-                      <div className="h-full rounded bg-campus-brass" style={{ width: `${selected.battery}%` }} />
-                    </div>
-                  </div>
-                </div>
-                {selected.isDemo ? (
-                  <p className="text-xs font-medium text-campus-accent">
-                    Dados DEMO — preparados para substituir por leituras MQTT reais.
+                ) : (
+                  <p className="rounded-xl border border-campus-line/70 p-3 text-sm text-campus-deep/65">
+                    Sinal e bateria ficam disponíveis quando existir telemetria MQTT.
                   </p>
-                ) : null}
-                <Link to="/alerts" className="btn-primary w-full">
+                )}
+
+                <p className="text-xs text-campus-deep/60">Atualizado {selected.lastSeenLabel}</p>
+
+                <div className="rounded-xl border border-campus-line/70 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-campus-deep/50">
+                    Alertas deste nó
+                  </p>
+                  {alertsLoading ? (
+                    <p className="mt-2 text-sm text-campus-deep/70">A carregar…</p>
+                  ) : alertsError ? (
+                    <p className="mt-2 text-sm text-red-700">{alertsError}</p>
+                  ) : alerts.length === 0 ? (
+                    <p className="mt-2 text-sm text-campus-deep/70">Nenhum alerta associado.</p>
+                  ) : (
+                    <ul className="mt-2 space-y-2">
+                      {alerts.map((a) => (
+                        <li key={a.id} className="text-sm">
+                          <span className="font-medium text-campus-ink">{a.title}</span>
+                          <span className="ml-2 text-[10px] font-semibold">{a.severity}</span>
+                          <p className="text-xs text-campus-deep/65">
+                            {a.acknowledged ? 'Confirmado' : 'Por confirmar'}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+               <Link to={`/alerts?deviceId=${encodeURIComponent(selected.id)}`} className="btn-primary w-full">
                   Ver alertas relacionados
                 </Link>
               </div>
@@ -138,8 +207,8 @@ export function IotHubPage() {
 
       <section className="surface overflow-hidden p-0">
         <div className="border-b border-campus-line/70 px-5 py-4">
-          <h3 className="font-display text-xl font-semibold text-campus-ink">Mapa da malha (simulado)</h3>
-          <p className="text-sm text-campus-deep/70">Disposição conceptual dos nós no campus</p>
+          <h3 className="font-display text-xl font-semibold text-campus-ink">Mapa da malha (conceptual)</h3>
+          <p className="text-sm text-campus-deep/70">Disposição ilustrativa dos nós; não representa localizações reais</p>
         </div>
         <div className="relative h-52 sm:h-64 md:h-72 bg-[radial-gradient(circle_at_30%_40%,rgba(26,107,92,0.12),transparent_40%),radial-gradient(circle_at_70%_55%,rgba(138,106,61,0.12),transparent_35%),linear-gradient(160deg,#eef4f1,#f7f9fb)]">
           {devices.slice(0, 6).map((d, i) => {

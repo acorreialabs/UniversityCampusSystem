@@ -1,6 +1,9 @@
 import type { IotDeviceView } from '../../lib/iotDemo';
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
+  // Sem pelo menos 2 pontos não há linha para desenhar (e evita divisão por zero)
+  if (values.length < 2) return <div className="h-8" aria-hidden />;
+
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
   const range = max - min || 1;
@@ -58,24 +61,29 @@ export function IotDeviceCard({
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {device.metrics.map((m) => (
-          <div key={m.key} className="rounded-xl bg-campus-mist/80 px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-campus-deep/50">{m.label}</p>
-            <p className="mt-0.5 font-display text-xl font-semibold text-campus-ink">
-              {m.value}
-              <span className="ml-1 text-xs font-sans font-medium text-campus-deep/60">{m.unit}</span>
-            </p>
-            <Sparkline values={m.trend} color={device.status === 'ONLINE' ? '#1a6b5c' : '#8a6a3d'} />
-          </div>
-        ))}
-      </div>
+      {device.metrics.length > 0 ? (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {device.metrics.map((m) => (
+            <div key={m.key} className="rounded-xl bg-campus-mist/80 px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-campus-deep/50">{m.label}</p>
+              <p className="mt-0.5 font-display text-xl font-semibold text-campus-ink">
+                {m.value}
+                {m.unit ? (
+                  <span className="ml-1 text-xs font-sans font-medium text-campus-deep/60">{m.unit}</span>
+                ) : null}
+              </p>
+              <Sparkline values={m.trend} color={device.status === 'ONLINE' ? '#1a6b5c' : '#8a6a3d'} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-4 text-xs text-campus-deep/60">Sem sensores associados</p>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-campus-deep/60">
-        <span>Sinal {device.signal}%</span>
-        <span>Bateria {device.battery}%</span>
-        <span>{device.lastSeenLabel}</span>
-        {device.isDemo ? <span className="font-semibold text-campus-accent">DEMO</span> : null}
+        {device.signal !== null ? <span>Sinal {device.signal}%</span> : null}
+        {device.battery !== null ? <span>Bateria {device.battery}%</span> : null}
+        <span>Atualizado {device.lastSeenLabel}</span>
       </div>
     </button>
   );

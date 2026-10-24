@@ -124,6 +124,19 @@ components:
           type: string
           enum: [AVAILABLE, OCCUPIED, MAINTENANCE, RESERVED]
         buildingId: { type: string }
+    CreateDeviceRequest:
+      type: object
+      required: [code, name, type]
+      properties:
+        code: { type: string, minLength: 2, maxLength: 32, example: TEMP-A-01 }
+        name: { type: string, minLength: 2, maxLength: 120, example: Sensor de temperatura A }
+        type: { type: string, minLength: 2, maxLength: 60, example: sensor }
+        status:
+          type: string
+          enum: [ONLINE, OFFLINE, MAINTENANCE, UNKNOWN]
+          description: Opcional. Por omissão UNKNOWN.
+        roomId: { type: string, nullable: true }
+        mqttTopic: { type: string, maxLength: 200, nullable: true }
     RoomDto:
       type: object
       properties:
@@ -482,6 +495,26 @@ paths:
       responses:
         '200':
           description: Dispositivos com sensores e sala
+    post:
+      tags: [IoT]
+      summary: Criar dispositivo
+      description: Roles ADMIN, COORDINATOR, TECHNICIAN. Regista o evento de auditoria DEVICE_CREATE.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateDeviceRequest' }
+      responses:
+        '201':
+          description: Dispositivo criado
+        '400':
+          description: Dados inválidos (VALIDATION_ERROR)
+        '403':
+          description: Sem permissão para este role
+        '404':
+          description: Sala não encontrada (ROOM_NOT_FOUND)
+        '409':
+          description: Já existe um dispositivo com este código (DEVICE_CODE_TAKEN)
   /sensors/{id}/readings:
     get:
       tags: [IoT]
@@ -503,6 +536,46 @@ paths:
       responses:
         '200':
           description: Últimos alertas
+  /alerts/{id}/ack:
+    patch:
+      tags: [IoT]
+      summary: Confirmar alerta
+      description: Roles ADMIN, COORDINATOR, TECHNICIAN. Operação idempotente, confirmar um alerta já confirmado devolve-o sem erro e sem nova auditoria. Regista o evento ALERT_ACK.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Alerta confirmado, com acknowledged a true
+        '403':
+          description: Sem permissão para este role
+        '404':
+          description: Alerta não encontrado (ALERT_NOT_FOUND)
+  /notifications:
+    get:
+      tags: [IoT]
+      summary: Listar as minhas notificações
+      description: Qualquer utilizador autenticado. Devolve só as notificações do próprio utilizador (até 50, da mais recente para a mais antiga).
+      responses:
+        '200':
+          description: Notificações do utilizador autenticado
+  /notifications/{id}/read:
+    patch:
+      tags: [IoT]
+      summary: Marcar notificação como lida
+      description: Qualquer utilizador autenticado, apenas nas suas próprias notificações. Idempotente. Uma notificação de outro utilizador responde 404, igual a um id inexistente.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Notificação com readAt preenchido
+        '404':
+          description: Notificação não encontrada (NOTIFICATION_NOT_FOUND)
   /parking/overview:
     get:
       tags: [Parking]
