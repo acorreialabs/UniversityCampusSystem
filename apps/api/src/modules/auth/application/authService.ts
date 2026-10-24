@@ -2,12 +2,12 @@ import { createHash, randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import type { RoleCode, User } from '@prisma/client';
-import { loadEnv } from '../../../config/env.js';
+import { getEnv } from '../../../config/env.js';
 import { prisma } from '../../../lib/prisma.js';
 import { conflict, forbidden, unauthorized } from '../../../lib/errors.js';
 import { audit } from '../../audit/application/auditService.js';
 
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = 10;
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -17,12 +17,34 @@ export async function verifyPassword(password: string, hash: string) {
   return bcrypt.compare(password, hash);
 }
 
+/** Custo de iterações gravado no próprio hash bcrypt (ex.: `$2b$12$…` → 12). */
+export function bcryptCost(hash: string): number {
+  const match = /^\$2[aby]\$(\d{2})\$/.exec(hash);
+  return match ? Number(match[1]) : 0;
+}
+
+/**
+ * Upgrade de hash no login: hashes antigos criados com custo superior a
+ * BCRYPT_ROUNDS demoram o dobro em cada login (o bcrypt.compare usa o custo
+ * gravado no hash). Depois de o utilizador se autenticar com sucesso,
+ * re-hasheamos a MESMA password com o custo actual — credenciais intactas.
+ * Falhas não bloqueiam o login (o hash antigo continua válido).
+ */
+async function upgradePasswordHash(userId: string, password: string) {
+  try {
+    const upgraded = await hashPassword(password);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash: upgraded } });
+  } catch {
+    // upgrade é optimização — nunca pode impedir o login
+  }
+}
+
 function hashToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
 
 function signAccessToken(user: User & { role: { code: RoleCode } }) {
-  const env = loadEnv();
+  const env = getEnv();
   return jwt.sign(
     { sub: user.id, email: user.email, role: user.role.code },
     env.JWT_ACCESS_SECRET,
@@ -40,7 +62,7 @@ function parseDurationToMs(value: string): number {
 }
 
 async function issueRefreshToken(userId: string) {
-  const env = loadEnv();
+  const env = getEnv();
   const refreshToken = randomBytes(48).toString('hex');
   const expiresAt = new Date(Date.now() + parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN));
   await prisma.refreshToken.create({
@@ -85,7 +107,13 @@ export async function login(email: string, password: string, meta: { correlation
     throw forbidden('Utilizador inactivo', 'USER_INACTIVE');
   }
 
-  const env = loadEnv();
+  // Hash antigo (custo mais alto) → re-hashear com o custo actual para os
+  // próximos logins serem rápidos. Só decorre após autenticação bem-sucedida.
+  if (bcryptCost(user.passwordHash) > BCRYPT_ROUNDS) {
+    await upgradePasswordHash(user.id, password);
+  }
+
+  const env = getEnv();
   const accessToken = signAccessToken(user);
   const refreshToken = await issueRefreshToken(user.id);
 
@@ -110,7 +138,7 @@ export async function login(email: string, password: string, meta: { correlation
 }
 
 export async function refresh(refreshToken: string, meta: { correlationId: string }) {
-  const env = loadEnv();
+  const env = getEnv();
   const tokenHash = hashToken(refreshToken);
   const stored = await prisma.refreshToken.findUnique({
     where: { tokenHash },

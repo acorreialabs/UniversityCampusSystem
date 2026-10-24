@@ -98,7 +98,7 @@ export function useCampusOpsData(): CampusOpsData {
         const [dashRes, roomsRes, buildingsRes, devicesRes] = await Promise.all([
           api.dashboard(),
           api.rooms(),
-          fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4100/api/v1'}/buildings`, {
+          fetch(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/buildings`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('sc_access')}` },
           }).then(async (r) => {
             const json = await r.json();
@@ -120,7 +120,7 @@ export function useCampusOpsData(): CampusOpsData {
         if (firstSensor?.id) {
           try {
             const readingsRes = await fetch(
-              `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4100/api/v1'}/sensors/${firstSensor.id}/readings`,
+              `${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/sensors/${firstSensor.id}/readings`,
               { headers: { Authorization: `Bearer ${localStorage.getItem('sc_access')}` } },
             );
             const readingsJson = await readingsRes.json();

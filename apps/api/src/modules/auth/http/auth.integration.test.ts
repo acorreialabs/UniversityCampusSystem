@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
+import bcrypt from 'bcryptjs';
 import { createApp } from '../../../app.js';
 import { prisma } from '../../../lib/prisma.js';
+import { bcryptCost } from '../application/authService.js';
 
 const app = createApp();
 
@@ -89,5 +91,36 @@ describe('API auth e fluxo transversal', () => {
     const token = login.body.data.tokens.accessToken;
     const res = await request(app).get('/api/v1/users').set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(403);
+  });
+
+  it('login faz upgrade do hash bcrypt antigo (custo 12 → 10) sem mudar a password', async () => {
+    const role = await prisma.role.findUnique({ where: { code: 'STUDENT' } });
+    expect(role).toBeTruthy();
+    const email = `upgrade-bcrypt-${Date.now()}@teste.local`;
+    const password = 'SenhaForte123!';
+    const oldHash = await bcrypt.hash(password, 12);
+
+    const user = await prisma.user.create({
+      data: { email, fullName: 'Upgrade Bcrypt Teste', passwordHash: oldHash, roleId: role!.id },
+    });
+
+    try {
+      expect(bcryptCost(oldHash)).toBe(12);
+
+      const first = await request(app).post('/api/v1/auth/login').send({ email, password });
+      expect(first.status).toBe(200);
+
+      const after = await prisma.user.findUnique({ where: { id: user.id }, select: { passwordHash: true } });
+      expect(after).toBeTruthy();
+      expect(bcryptCost(after!.passwordHash)).toBe(10);
+
+      const second = await request(app).post('/api/v1/auth/login').send({ email, password });
+      expect(second.status).toBe(200);
+
+      const wrong = await request(app).post('/api/v1/auth/login').send({ email, password: 'SenhaErrada999!' });
+      expect(wrong.status).toBe(401);
+    } finally {
+      await prisma.user.delete({ where: { id: user.id } }).catch(() => undefined);
+    }
   });
 });

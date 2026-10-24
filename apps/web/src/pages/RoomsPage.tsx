@@ -16,7 +16,7 @@ export function RoomsPage() {
   async function load() {
     const [roomsRes, buildingsRes] = await Promise.all([
       api.rooms(),
-      fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4100/api/v1'}/buildings`, {
+      fetch(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/buildings`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('sc_access')}` },
       }).then((r) => r.json()),
     ]);

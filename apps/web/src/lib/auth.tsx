@@ -29,7 +29,7 @@ const tokenStore = {
   },
 };
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4100/api/v1';
+const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const api = useMemo(() => createApiClient(baseUrl, tokenStore), []);
