@@ -54,7 +54,7 @@ describe('Módulo Assiduidade — /attendance', () => {
     const studentB = studentBUser
       ? await prisma.studentProfile.findUnique({ where: { userId: studentBUser.id } })
       : null;
-    const room = await prisma.room.findFirst({ where: { code: 'A-101' } });
+    const room = await prisma.room.findFirst({ where: { code: 'D2-101' } });
     const department = await prisma.department.findFirst();
     if (!subject || !teacher2 || !studentA || !studentB || !room || !department) {
       throw new Error('Seed necessário antes dos testes (npm run db:seed)');
