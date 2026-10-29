@@ -29,6 +29,9 @@ import { schedulesRouter } from './modules/schedules/http/schedulesRouter.js';
 import { attendanceRouter } from './modules/attendance/http/attendanceRouter.js';
 import { notificationsRouter } from './modules/notifications/http/notificationsRouter.js';
 import { academicRouter } from './modules/academic/http/academicRouter.js';
+import { studentRouter } from './modules/students/http/studentRouter.js';
+import { teacherRouter } from './modules/teachers/http/teacherRouter.js';
+import { enrolmentRouter } from './modules/enrolments/http/enrolmentRouter.js';
 
 export function createApp() {
   const env = loadEnv();
@@ -131,6 +134,9 @@ export function createApp() {
   v1.use(schedulesRouter);
   v1.use(attendanceRouter);
   v1.use(notificationsRouter);
+  v1.use(studentRouter);
+  v1.use(teacherRouter);
+  v1.use(enrolmentRouter);
   v1.use(academicRouter);
 
   app.use('/api/v1', v1);

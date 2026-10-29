@@ -24,6 +24,9 @@ import { SchedulesPage } from './pages/SchedulesPage';
 import { AssessmentsPage } from './pages/AssessmentsPage';
 import { AttendancePage } from './pages/AttendancePage';
 import { CampusHubPage } from './pages/CampusHubPage';
+import { StudentsPage } from './pages/StudentsPage';
+import { TeachersPage } from './pages/TeachersPage';
+import { EnrolmentsPage } from './pages/EnrolmentsPage';
 import { ModulePlaceholderPage } from './pages/ModulePlaceholderPage';
 import { campusModules, type RoleCode } from '@smart-campus/shared-types';
 import { NotificationsPage } from './pages/NotificationsPage';
@@ -119,6 +122,9 @@ export function App() {
         <Route path="parking" element={<ParkingPage />} />
         <Route path="devices" element={<DevicesPage />} />
         <Route path="alerts" element={<AlertsPage />} />
+        <Route path="students" element={<StudentsPage />} />
+        <Route path="teachers" element={<TeachersPage />} />
+        <Route path="enrolments" element={<EnrolmentsPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="audit" element={<AuditPage />} />
         <Route path="admin" element={<AdminPage />} />
